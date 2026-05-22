@@ -1,35 +1,73 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-const topicReplies: Record<string, string> = {
-  domestic: "Under Pakistani law, domestic violence is criminalized in several provinces (e.g., Punjab Protection of Women Against Violence Act 2016, Sindh Domestic Violence Act 2013). You can seek a protection order through a court, contact the Rozan helpline (051-2890505), or report to the police (15). You have the right to safety, shelter, and legal aid.",
-  divorce: "Women in Pakistan have the right to divorce through Khula (judicial) or Talaq-e-Tafweez (delegated). Under the Muslim Family Laws Ordinance 1961, women are entitled to Mehr, maintenance during iddat, and a fair share of marital assets where applicable. A family court can grant Khula without the husband's consent.",
-  harassment: "The Protection Against Harassment of Women at the Workplace Act 2010 requires employers to maintain an internal inquiry committee. You may file a complaint with the committee, the Federal/Provincial Ombudsperson, or directly in court. You are protected against retaliation.",
-  inheritance: "Under Islamic and Pakistani law, daughters inherit half the share of sons; widows receive 1/8 if there are children, 1/4 otherwise. The Enforcement of Women's Property Rights Act 2020 protects women from being deprived of inheritance and provides fast-track redress through the Ombudsperson.",
-  custody: "Under the Guardians and Wards Act 1890, custody (Hizanat) of young children typically goes to the mother — boys until age 7 and girls until puberty — subject to the child's welfare being paramount. The father usually remains the legal guardian. Courts decide based on the child's best interest.",
-};
+const SYSTEM_PROMPT = `You are Haqq AI, a compassionate women's rights legal assistant for Pakistan. Help women understand their legal rights in simple clear language. Cover domestic violence, divorce, workplace harassment, inheritance, child custody, property rights, FIR filing. If user writes in Urdu respond in Urdu. If English respond in English. Always be empathetic. Cite Pakistani laws like Protection of Women Act 2006. For abuse or harassment questions end with: Rozan Counseling: 051-2890505 | Edhi Foundation: 115 | Police: 15. End every response with: This is general information — please consult a lawyer for your specific case.`;
 
-function reply(message: string): string {
-  const m = message.toLowerCase();
-  if (m.includes("domestic") || m.includes("violence") || m.includes("گھریلو")) return topicReplies.domestic;
-  if (m.includes("divorce") || m.includes("khula") || m.includes("طلاق") || m.includes("mehr")) return topicReplies.divorce;
-  if (m.includes("harass") || m.includes("workplace") || m.includes("ہراسگی")) return topicReplies.harassment;
-  if (m.includes("inherit") || m.includes("ورثہ") || m.includes("property")) return topicReplies.inheritance;
-  if (m.includes("custody") || m.includes("child") || m.includes("بچوں") || m.includes("حضانت")) return topicReplies.custody;
-  return "Thank you for your question. I can help with topics like domestic violence, divorce rights, workplace harassment, inheritance, and child custody in Pakistan. Please ask a specific question, or tap one of the quick topics above. For immediate help, call Rozan: 051-2890505.";
-}
+type ChatMsg = { role: "user" | "assistant" | "system"; content: string };
 
 export const Route = createFileRoute("/api/chat")({
   server: {
     handlers: {
       POST: async ({ request }) => {
         try {
-          const body = (await request.json()) as { message?: string };
-          const msg = (body.message ?? "").toString().slice(0, 2000);
-          if (!msg.trim()) {
+          const body = (await request.json()) as {
+            message?: string;
+            messages?: ChatMsg[];
+          };
+
+          const history: ChatMsg[] = Array.isArray(body.messages)
+            ? body.messages
+                .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
+                .map((m) => ({ role: m.role, content: m.content.slice(0, 4000) }))
+            : [];
+
+          if (body.message && typeof body.message === "string") {
+            history.push({ role: "user", content: body.message.slice(0, 4000) });
+          }
+
+          if (history.length === 0) {
             return Response.json({ reply: "Please type a question." }, { status: 400 });
           }
-          return Response.json({ reply: reply(msg) });
-        } catch {
+
+          const apiKey = process.env.LMARENA_API_KEY;
+          if (!apiKey) {
+            return Response.json(
+              { reply: "Server is not configured with an API key. Please contact the administrator." },
+              { status: 500 },
+            );
+          }
+
+          const upstream = await fetch("https://api.lmarena.ai/v1/chat/completions", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${apiKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: "gpt-4o",
+              messages: [{ role: "system", content: SYSTEM_PROMPT }, ...history],
+              temperature: 0.5,
+            }),
+          });
+
+          if (!upstream.ok) {
+            const errText = await upstream.text().catch(() => "");
+            console.error("LMArena error:", upstream.status, errText);
+            if (upstream.status === 429) {
+              return Response.json({ reply: "Too many requests right now. Please try again in a moment." }, { status: 429 });
+            }
+            return Response.json(
+              { reply: "Sorry, the AI service is unavailable right now. Please try again shortly." },
+              { status: 502 },
+            );
+          }
+
+          const data = (await upstream.json()) as {
+            choices?: Array<{ message?: { content?: string } }>;
+          };
+          const reply = data.choices?.[0]?.message?.content?.trim() || "Sorry, I couldn't generate a response.";
+          return Response.json({ reply });
+        } catch (err) {
+          console.error("chat handler error:", err);
           return Response.json({ reply: "Invalid request." }, { status: 400 });
         }
       },
