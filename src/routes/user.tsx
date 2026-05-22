@@ -40,13 +40,14 @@ function UserPage() {
     const t = text.trim();
     if (!t || loading) return;
     setInput("");
-    setMessages((m) => [...m, { role: "user", content: t }]);
+    const nextHistory: Msg[] = [...messages, { role: "user", content: t }];
+    setMessages(nextHistory);
     setLoading(true);
     try {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: t }),
+        body: JSON.stringify({ messages: nextHistory }),
       });
       const data = await res.json();
       setMessages((m) => [...m, { role: "assistant", content: data.reply ?? "..." }]);
