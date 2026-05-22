@@ -28,7 +28,7 @@ export const Route = createFileRoute("/api/chat")({
             return Response.json({ reply: "Please type a question." }, { status: 400 });
           }
 
-          const apiKey = process.env.LMARENA_API_KEY;
+          const apiKey = process.env.GROQ_API_KEY;
           if (!apiKey) {
             return Response.json(
               { reply: "Server is not configured with an API key. Please contact the administrator." },
@@ -36,14 +36,14 @@ export const Route = createFileRoute("/api/chat")({
             );
           }
 
-          const upstream = await fetch("https://api.lmarena.ai/v1/chat/completions", {
+          const upstream = await fetch("https://api.groq.com/openai/v1/chat/completions", {
             method: "POST",
             headers: {
               Authorization: `Bearer ${apiKey}`,
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              model: "gpt-4o",
+              model: "meta-llama/llama-4-scout-17b-16e-instruct",
               messages: [{ role: "system", content: SYSTEM_PROMPT }, ...history],
               temperature: 0.5,
             }),
@@ -51,7 +51,7 @@ export const Route = createFileRoute("/api/chat")({
 
           if (!upstream.ok) {
             const errText = await upstream.text().catch(() => "");
-            console.error("LMArena error:", upstream.status, errText);
+            console.error("Groq error:", upstream.status, errText);
             if (upstream.status === 429) {
               return Response.json({ reply: "Too many requests right now. Please try again in a moment." }, { status: 429 });
             }
