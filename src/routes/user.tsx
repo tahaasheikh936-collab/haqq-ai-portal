@@ -159,7 +159,7 @@ function UserPage() {
                       : "bg-secondary text-foreground"
                   }`}
                 >
-                  {m.content}
+                  {m.role === "assistant" ? <FormattedMessage content={m.content} /> : m.content}
                 </div>
               </div>
             ))}
