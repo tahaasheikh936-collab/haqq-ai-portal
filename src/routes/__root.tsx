@@ -72,16 +72,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Haqq AI is a web application providing legal information on women's rights in Pakistan." },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Haqq AI is a web application providing legal information on women's rights in Pakistan." },
+      { title: "Haqq AI — Women's Rights Agent for Pakistan" },
+      { name: "description", content: "Haqq AI is a bilingual legal assistant providing information on women's rights in Pakistan." },
+      { name: "author", content: "Haqq AI" },
+      { property: "og:title", content: "Haqq AI — Women's Rights Agent for Pakistan" },
+      { property: "og:description", content: "Haqq AI is a bilingual legal assistant providing information on women's rights in Pakistan." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Lovable App" },
-      { name: "twitter:description", content: "Haqq AI is a web application providing legal information on women's rights in Pakistan." },
+      { name: "twitter:title", content: "Haqq AI — Women's Rights Agent for Pakistan" },
+      { name: "twitter:description", content: "Haqq AI is a bilingual legal assistant providing information on women's rights in Pakistan." },
     ],
     links: [
       {
