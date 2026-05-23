@@ -24,6 +24,76 @@ const helplines = [
 
 type Msg = { role: "user" | "assistant"; content: string };
 
+function renderInline(text: string) {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((p, i) =>
+    p.startsWith("**") && p.endsWith("**") ? (
+      <strong key={i} className="font-semibold">{p.slice(2, -2)}</strong>
+    ) : (
+      <span key={i}>{p}</span>
+    )
+  );
+}
+
+function FormattedMessage({ content }: { content: string }) {
+  // Normalize: ensure bullets and headings sit on their own lines.
+  const normalized = content
+    .replace(/\s*•\s*/g, "\n• ")
+    .replace(/(Your Legal Rights:|Immediate Steps You Can Take:|Emergency Helplines:)/g, "\n\n$1\n");
+
+  const blocks = normalized.split(/\n{2,}/).map((b) => b.trim()).filter(Boolean);
+
+  return (
+    <div className="space-y-3">
+      {blocks.map((block, bi) => {
+        const lines = block.split("\n").map((l) => l.trim()).filter(Boolean);
+        const headingMatch = lines[0]?.match(/^(Your Legal Rights|Immediate Steps You Can Take|Emergency Helplines):?$/);
+        if (headingMatch) {
+          const bullets = lines.slice(1).filter((l) => l.startsWith("•"));
+          const rest = lines.slice(1).filter((l) => !l.startsWith("•"));
+          return (
+            <div key={bi}>
+              <h4 className="mb-1.5 text-sm font-bold uppercase tracking-wide text-primary">
+                {headingMatch[1]}
+              </h4>
+              {bullets.length > 0 ? (
+                <ul className="space-y-1.5">
+                  {bullets.map((b, i) => (
+                    <li key={i} className="flex gap-2">
+                      <span className="text-primary">•</span>
+                      <span className="flex-1">{renderInline(b.replace(/^•\s*/, ""))}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+              {rest.length > 0 ? (
+                <p className="mt-1">{renderInline(rest.join(" "))}</p>
+              ) : null}
+            </div>
+          );
+        }
+        // Plain block (may include bullets)
+        const bullets = lines.filter((l) => l.startsWith("•"));
+        if (bullets.length > 0 && bullets.length === lines.length) {
+          return (
+            <ul key={bi} className="space-y-1.5">
+              {bullets.map((b, i) => (
+                <li key={i} className="flex gap-2">
+                  <span className="text-primary">•</span>
+                  <span className="flex-1">{renderInline(b.replace(/^•\s*/, ""))}</span>
+                </li>
+              ))}
+            </ul>
+          );
+        }
+        return (
+          <p key={bi} className="whitespace-pre-wrap">{renderInline(lines.join("\n"))}</p>
+        );
+      })}
+    </div>
+  );
+}
+
 function UserPage() {
   const [messages, setMessages] = useState<Msg[]>([
     { role: "assistant", content: "السلام علیکم 🌸 I'm Haqq AI. Ask me anything about women's rights in Pakistan — in Urdu or English. آپ اردو یا انگریزی میں سوال پوچھ سکتی ہیں۔" },
