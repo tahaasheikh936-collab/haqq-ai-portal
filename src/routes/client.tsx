@@ -28,7 +28,7 @@ const provinces = [
 ];
 
 const impact = [
-  { label: "Cases Reported Nationwide (2024)", value: "10,201+", icon: AlertTriangle, color: "from-primary to-teal" },
+  { label: "Cases Reported Across Pakistan (2024)", value: "10,201+", icon: AlertTriangle, color: "from-primary to-teal" },
   { label: "Rape Cases (2023) — 1 every 45 min", value: "6,624", icon: Siren, color: "from-teal to-primary" },
   { label: "Domestic Violence Cases (2024)", value: "2,000+", icon: Home, color: "from-primary to-chart-3" },
   { label: "Conviction Rate", value: "< 2%", icon: Scale, color: "from-destructive to-primary" },
@@ -69,7 +69,7 @@ function ClientPage() {
           <div>
             <h1 className="text-3xl font-bold">Partner Dashboard</h1>
             <p className="mt-1 text-muted-foreground">
-              Pakistan women's rights — reported violence and access to justice.
+              Real data from Pakistan — sourced from HRCP, UN Women Pakistan & SSDO 2023–2024.
             </p>
           </div>
           <button
@@ -94,7 +94,7 @@ function ClientPage() {
 
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
           <div className="rounded-2xl border border-border bg-card p-6">
-            <h2 className="text-lg font-semibold">Types of Violence Against Women</h2>
+            <h2 className="text-lg font-semibold">Types of Violence Against Women in Pakistan</h2>
             <p className="text-sm text-muted-foreground">Distribution of reported cases in Pakistan.</p>
             <div className="mt-4 h-80">
               <ResponsiveContainer width="100%" height="100%">
@@ -128,7 +128,7 @@ function ClientPage() {
           </div>
 
           <div className="rounded-2xl border border-border bg-card p-6">
-            <h2 className="text-lg font-semibold">Cases by Province (2024)</h2>
+            <h2 className="text-lg font-semibold">Cases by Province in Pakistan (2024)</h2>
             <p className="text-sm text-muted-foreground">Share of reported cases across provinces.</p>
             <div className="mt-4 h-80">
               <ResponsiveContainer width="100%" height="100%">
