@@ -95,6 +95,13 @@ const FALLBACK: SheetData = {
   ],
 };
 
+const YEARLY_GBV = [
+  { year: "2022", "Total GBV": 4890, Rape: 4200, "Honour Killings": 96, "Domestic Violence": 346 },
+  { year: "2023", "Total GBV": 5253, Rape: 6624, "Honour Killings": 136, "Domestic Violence": 350 },
+  { year: "2024", "Total GBV": 6543, Rape: 3815, "Honour Killings": 470, "Domestic Violence": 1332 },
+  { year: "2025", "Total GBV": 32617, Rape: 5339, "Honour Killings": 547, "Domestic Violence": 2238 },
+];
+
 const STAT_ICONS = [AlertTriangle, Siren, Home, Scale];
 const STAT_GRADIENTS = [
   "from-primary to-teal",
