@@ -95,6 +95,13 @@ const FALLBACK: SheetData = {
   ],
 };
 
+const YEARLY_GBV = [
+  { year: "2022", "Total GBV": 4890, Rape: 4200, "Honour Killings": 96, "Domestic Violence": 346 },
+  { year: "2023", "Total GBV": 5253, Rape: 6624, "Honour Killings": 136, "Domestic Violence": 350 },
+  { year: "2024", "Total GBV": 6543, Rape: 3815, "Honour Killings": 470, "Domestic Violence": 1332 },
+  { year: "2025", "Total GBV": 32617, Rape: 5339, "Honour Killings": 547, "Domestic Violence": 2238 },
+];
+
 const STAT_ICONS = [AlertTriangle, Siren, Home, Scale];
 const STAT_GRADIENTS = [
   "from-primary to-teal",
@@ -217,25 +224,14 @@ function ClientPage() {
 
             <div className="mt-8 grid gap-6 lg:grid-cols-2">
               <div className="rounded-2xl border border-border bg-card p-6">
-                <h2 className="text-lg font-semibold">Reported Cases by Category in Pakistan</h2>
-                <p className="text-sm text-muted-foreground">Distribution of reported GBV cases (live).</p>
+                <h2 className="text-lg font-semibold">Year-by-Year GBV Cases in Pakistan (2022–2025)</h2>
+                <p className="text-sm text-muted-foreground">Grouped comparison across categories.</p>
                 <div className="mt-4 h-80">
                   <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={pieData}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={100}
-                        innerRadius={50}
-                        paddingAngle={2}
-                      >
-                        {pieData.map((_, i) => (
-                          <Cell key={i} fill={COLORS[i % COLORS.length]} />
-                        ))}
-                      </Pie>
+                    <BarChart data={YEARLY_GBV} margin={{ left: -10 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                      <XAxis dataKey="year" stroke="var(--muted-foreground)" fontSize={12} />
+                      <YAxis stroke="var(--muted-foreground)" fontSize={11} />
                       <Tooltip
                         contentStyle={{
                           background: "var(--card)",
@@ -245,9 +241,16 @@ function ClientPage() {
                         formatter={(v: number) => v.toLocaleString()}
                       />
                       <Legend />
-                    </PieChart>
+                      <Bar dataKey="Total GBV" fill="#8b5cf6" radius={[6, 6, 0, 0]} />
+                      <Bar dataKey="Rape" fill="#14b8a6" radius={[6, 6, 0, 0]} />
+                      <Bar dataKey="Honour Killings" fill="#ef4444" radius={[6, 6, 0, 0]} />
+                      <Bar dataKey="Domestic Violence" fill="#f59e0b" radius={[6, 6, 0, 0]} />
+                    </BarChart>
                   </ResponsiveContainer>
                 </div>
+                <p className="mt-3 text-xs text-muted-foreground">
+                  ⚠️ Cases have increased 567% from 2022 to 2025 — Source: HRCP & SSDO
+                </p>
               </div>
 
               <div className="rounded-2xl border border-border bg-card p-6">
