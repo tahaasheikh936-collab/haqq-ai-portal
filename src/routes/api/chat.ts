@@ -87,6 +87,44 @@ export const Route = createFileRoute("/api/chat")({
             choices?: Array<{ message?: { content?: string } }>;
           };
           const reply = data.choices?.[0]?.message?.content?.trim() || "Sorry, I couldn't generate a response.";
+
+          // Log the exchange to the queries table (fire-and-forget; don't fail the chat on log error)
+          try {
+            const lastUserMsg = [...history].reverse().find((m) => m.role === "user")?.content ?? "";
+            const isUrdu = /[\u0600-\u06FF]/.test(lastUserMsg);
+            const language = isUrdu ? "urdu" : "english";
+            const text = (lastUserMsg + " " + reply).toLowerCase();
+            const topic_category =
+              /divorce|طلاق|khula|mehr/.test(text) ? "Divorce Rights"
+              : /inherit|وراثت|inheritance/.test(text) ? "Inheritance"
+              : /harass|ہراس|workplace/.test(text) ? "Workplace Harassment"
+              : /custody|بچوں|child/.test(text) ? "Child Custody"
+              : /violence|تشدد|domestic|abuse/.test(text) ? "Domestic Violence"
+              : "General";
+
+            const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+            const supabaseKey = process.env.SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+            if (supabaseUrl && supabaseKey && lastUserMsg) {
+              await fetch(`${supabaseUrl}/rest/v1/queries`, {
+                method: "POST",
+                headers: {
+                  apikey: supabaseKey,
+                  Authorization: `Bearer ${supabaseKey}`,
+                  "Content-Type": "application/json",
+                  Prefer: "return=minimal",
+                },
+                body: JSON.stringify({
+                  user_message: lastUserMsg.slice(0, 4000),
+                  ai_response: reply.slice(0, 8000),
+                  topic_category,
+                  language,
+                }),
+              }).catch((e) => console.error("query log failed:", e));
+            }
+          } catch (logErr) {
+            console.error("query log error:", logErr);
+          }
+
           return Response.json({ reply });
         } catch (err) {
           console.error("chat handler error:", err);
