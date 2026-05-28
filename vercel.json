@@ -1,5 +1,5 @@
 {
-  "rewrites": [
-    { "source": "/((?!api/).*)", "destination": "/" }
-  ]
+  "framework": null,
+  "buildCommand": "vite build",
+  "outputDirectory": ".vercel/output"
 }
