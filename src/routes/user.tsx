@@ -185,7 +185,7 @@ function UserPage() {
                       : "bg-secondary text-foreground"
                   }`}
                 >
-                  {m.role === "assistant" ? <FormattedMessage content={m.content} /> : m.content}
+                  {m.role === "assistant" ? <FormattedMessage content={m.content} /> : renderWithUrdu(m.content, `msg-${i}`)}
                 </div>
               </div>
             ))}
