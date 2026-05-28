@@ -82,9 +82,15 @@ function AdminPage() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <p className="mt-1 text-muted-foreground">Live data from Haqq AI chat logs.</p>
+      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+        <div className="rounded-3xl border border-border bg-gradient-to-br from-primary/8 via-card to-teal/8 p-8 shadow-sm">
+          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-primary">
+            <span className="h-1.5 w-1.5 rounded-full bg-teal animate-pulse" /> Live
+          </div>
+          <h1 className="mt-2 text-4xl font-bold tracking-tight">Admin Dashboard</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Real-time analytics from Haqq AI chat logs.</p>
+        </div>
+
 
         {rows === null ? (
           <div className="mt-12 flex items-center justify-center gap-2 text-muted-foreground">
@@ -100,22 +106,30 @@ function AdminPage() {
 
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {metrics.map((m) => (
-                <div key={m.label} className="rounded-2xl border border-border bg-card p-5">
+                <div key={m.label} className="group relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm">
+                  <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${m.color}`} />
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">{m.label}</span>
-                    <div className={`rounded-lg bg-gradient-to-br ${m.color} p-2 text-primary-foreground`}>
+                    <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{m.label}</span>
+                    <div className={`rounded-xl bg-gradient-to-br ${m.color} p-2.5 text-primary-foreground shadow-sm transition-transform group-hover:scale-110`}>
                       <m.icon className="h-4 w-4" />
                     </div>
                   </div>
-                  <div className="mt-3 text-2xl font-bold">{m.value}</div>
+                  <div className="mt-4 text-3xl font-bold tracking-tight">{m.value}</div>
                 </div>
               ))}
             </div>
 
-            <div className="mt-8 rounded-2xl border border-border bg-card p-6">
-              <h2 className="text-lg font-semibold">Top Topics</h2>
-              <p className="text-xs text-muted-foreground">Most asked categories — all time</p>
-              <div className="mt-4 h-72">
+            <div className="mt-8 rounded-2xl border border-border bg-card p-6 shadow-sm">
+              <div className="flex items-end justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold">Top Topics</h2>
+                  <p className="mt-1 text-xs text-muted-foreground">Most asked categories — all time</p>
+                </div>
+                <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+                  {topicChart.length} categories
+                </span>
+              </div>
+              <div className="mt-6 h-72">
                 {topicChart.length === 0 ? (
                   <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
                     No queries yet. Ask Haqq AI on the Chat page to populate this.
@@ -123,17 +137,19 @@ function AdminPage() {
                 ) : (
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={topicChart} margin={{ left: -10 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                       <XAxis dataKey="topic" stroke="var(--muted-foreground)" fontSize={11} interval={0} angle={-10} textAnchor="end" height={60} />
                       <YAxis stroke="var(--muted-foreground)" fontSize={12} allowDecimals={false} />
                       <Tooltip
+                        cursor={{ fill: "color-mix(in oklab, var(--primary) 6%, transparent)" }}
                         contentStyle={{
                           background: "var(--card)",
                           border: "1px solid var(--border)",
                           borderRadius: 12,
+                          boxShadow: "0 8px 24px rgba(17,24,39,0.08)",
                         }}
                       />
-                      <Bar dataKey="count" radius={[8, 8, 0, 0]}>
+                      <Bar dataKey="count" radius={[10, 10, 0, 0]}>
                         {topicChart.map((_, i) => (
                           <Cell key={i} fill={TOPIC_COLORS[i % TOPIC_COLORS.length]} />
                         ))}
@@ -144,41 +160,59 @@ function AdminPage() {
               </div>
             </div>
 
-            <div className="mt-8 overflow-hidden rounded-2xl border border-border bg-card">
-              <div className="border-b border-border p-6">
-                <h2 className="text-lg font-semibold">Recent Questions</h2>
-                <p className="text-xs text-muted-foreground">Latest live queries from users</p>
+            <div className="mt-8 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+              <div className="flex items-center justify-between border-b border-border p-6">
+                <div>
+                  <h2 className="text-xl font-semibold">Recent Questions</h2>
+                  <p className="mt-1 text-xs text-muted-foreground">Latest live queries from users</p>
+                </div>
+                <span className="rounded-full bg-teal/10 px-3 py-1 text-xs font-medium text-teal">
+                  Showing {recent.length}
+                </span>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="bg-secondary text-left text-xs uppercase tracking-wide text-muted-foreground">
+                  <thead className="sticky top-0 bg-secondary/60 text-left text-[11px] uppercase tracking-wider text-muted-foreground backdrop-blur">
                     <tr>
-                      <th className="px-6 py-3">Question</th>
-                      <th className="px-6 py-3">Topic</th>
-                      <th className="px-6 py-3">Language</th>
-                      <th className="px-6 py-3">Time</th>
+                      <th className="px-6 py-3 font-semibold">Question</th>
+                      <th className="px-6 py-3 font-semibold">Topic</th>
+                      <th className="px-6 py-3 font-semibold">Language</th>
+                      <th className="px-6 py-3 font-semibold">Time</th>
                     </tr>
                   </thead>
                   <tbody>
                     {recent.length === 0 ? (
                       <tr>
-                        <td colSpan={4} className="px-6 py-8 text-center text-muted-foreground">
+                        <td colSpan={4} className="px-6 py-10 text-center text-muted-foreground">
                           No queries logged yet.
                         </td>
                       </tr>
                     ) : (
-                      recent.map((r) => (
-                        <tr key={r.id} className="border-t border-border">
-                          <td className="max-w-md truncate px-6 py-4 font-medium">{r.user_message}</td>
-                          <td className="px-6 py-4 text-muted-foreground">{r.topic_category}</td>
-                          <td className="px-6 py-4">
-                            <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium capitalize">
-                              {r.language}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-muted-foreground">{timeAgo(r.created_at)}</td>
-                        </tr>
-                      ))
+                      recent.map((r) => {
+                        const isUrdu = r.language?.toLowerCase() === "urdu";
+                        return (
+                          <tr key={r.id} className="border-t border-border transition-colors hover:bg-secondary/40">
+                            <td className="max-w-md truncate px-6 py-4 font-medium" title={r.user_message}>
+                              <span className={isUrdu ? "font-urdu" : ""} dir={isUrdu ? "rtl" : "ltr"}>
+                                {r.user_message}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className="inline-flex rounded-full bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary">
+                                {r.topic_category}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium capitalize ${
+                                isUrdu ? "bg-teal/10 text-teal" : "bg-secondary text-secondary-foreground"
+                              }`}>
+                                {r.language}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-muted-foreground">{timeAgo(r.created_at)}</td>
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>
