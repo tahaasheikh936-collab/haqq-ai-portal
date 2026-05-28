@@ -82,9 +82,15 @@ function AdminPage() {
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <p className="mt-1 text-muted-foreground">Live data from Haqq AI chat logs.</p>
+      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+        <div className="rounded-3xl border border-border bg-gradient-to-br from-primary/8 via-card to-teal/8 p-8 shadow-sm">
+          <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-primary">
+            <span className="h-1.5 w-1.5 rounded-full bg-teal animate-pulse" /> Live
+          </div>
+          <h1 className="mt-2 text-4xl font-bold tracking-tight">Admin Dashboard</h1>
+          <p className="mt-2 text-sm text-muted-foreground">Real-time analytics from Haqq AI chat logs.</p>
+        </div>
+
 
         {rows === null ? (
           <div className="mt-12 flex items-center justify-center gap-2 text-muted-foreground">
