@@ -24,13 +24,39 @@ const helplines = [
 
 type Msg = { role: "user" | "assistant"; content: string };
 
+// Match Urdu/Arabic script runs (with spaces & punctuation between them)
+const URDU_RE = /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF][\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF\s\u060C\u061B\u061F.،۔!?"'()-]*/g;
+
+function renderWithUrdu(text: string, keyPrefix = "") {
+  const out: React.ReactNode[] = [];
+  let last = 0;
+  let i = 0;
+  for (const m of text.matchAll(URDU_RE)) {
+    const start = m.index ?? 0;
+    if (start > last) out.push(<span key={`${keyPrefix}-l-${i++}`}>{text.slice(last, start)}</span>);
+    out.push(
+      <span
+        key={`${keyPrefix}-u-${i++}`}
+        lang="ur"
+        dir="rtl"
+        className="font-urdu inline-block align-middle"
+      >
+        {m[0]}
+      </span>
+    );
+    last = start + m[0].length;
+  }
+  if (last < text.length) out.push(<span key={`${keyPrefix}-l-${i++}`}>{text.slice(last)}</span>);
+  return out;
+}
+
 function renderInline(text: string) {
   const parts = text.split(/(\*\*[^*]+\*\*)/g);
   return parts.map((p, i) =>
     p.startsWith("**") && p.endsWith("**") ? (
-      <strong key={i} className="font-semibold">{p.slice(2, -2)}</strong>
+      <strong key={i} className="font-semibold">{renderWithUrdu(p.slice(2, -2), `b${i}`)}</strong>
     ) : (
-      <span key={i}>{p}</span>
+      <span key={i}>{renderWithUrdu(p, `t${i}`)}</span>
     )
   );
 }
